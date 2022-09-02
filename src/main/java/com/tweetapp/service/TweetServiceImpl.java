@@ -3,6 +3,7 @@ package com.tweetapp.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -112,7 +113,7 @@ public class TweetServiceImpl implements TweetService {
 		try {
 			TweetEntity tweet = tweetRepository.findById(tweetId).orElse(null);
 			List<CommentPojo>  list = tweet.getComments();
-	    	list.add(new CommentPojo(username, reply.getReply(), reply.getImageUrl()));
+	    	list.add(new CommentPojo(username, reply.getReply(),reply.getImageUrl()));
 	    	tweet.setCommentCount(list.size());
 	    	tweet.setComments(list);
 	    	tweetRepository.save(tweet);
@@ -160,16 +161,17 @@ public class TweetServiceImpl implements TweetService {
 			UserEntity u = userRepository.findUserEntityByUsername(username);
 			if(u == null)
 				return null;
-			List<TweetEntity> te = tweetRepository.findTweetEntityByUsername(username);
-			if(te == null)
+			List<TweetEntity> tweetList = tweetRepository.findTweetEntityByUsername(username);
+			if(tweetList == null)
 				return null;
-			List<TweetResponse> l = new ArrayList<>();
 			
-			for(TweetEntity t : te)
-			{
-				l.add(new TweetResponse(t.getTweetText(), t.getTagText(), t.getTweetDate(), t.getLikesCount(),
-						t.getCommentCount(),t.getLikes(), t.getComments()));
-			}
+			List<TweetResponse> l = tweetList.stream()
+					.map( t->  new TweetResponse(
+					t.getId(),t.getTweetText(), t.getTagText(), t.getTweetDate(), t.getLikesCount(),
+						t.getCommentCount(),t.getLikes(), t.getComments()))
+					.collect(Collectors.toList());
+					
+					
 			
 			UserResponse ur = new UserResponse();
 			ur.setFirstName(u.getFirstName());

@@ -29,7 +29,7 @@ public class AuthService {
 		if(user.getPassword().equals(loginCredential.getPassword()))
 		{
 			String token = jwtUtil.generateToken(user);
-			return new UserToken(user.getUsername(), token);
+			return new UserToken(user.getUsername(), token, true);
 		}
 		else
 		{

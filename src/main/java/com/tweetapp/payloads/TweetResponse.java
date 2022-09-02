@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 public class TweetResponse {
-	
+	private String tweetId;
 	private String tweetText;
 	private String tagText;
 	private LocalDateTime tweetDate;
@@ -19,9 +19,10 @@ public class TweetResponse {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	public TweetResponse(String tweetText, String tagText, LocalDateTime tweetDate, Integer likesCount,
+	public TweetResponse(String tweetId, String tweetText, String tagText, LocalDateTime tweetDate, Integer likesCount,
 			Integer commentCount, Set<String> likes, List<CommentPojo> comments) {
 		super();
+		this.tweetId = tweetId;
 		this.tweetText = tweetText;
 		this.tagText = tagText;
 		this.tweetDate = tweetDate;
@@ -29,6 +30,12 @@ public class TweetResponse {
 		this.commentCount = commentCount;
 		this.likes = likes;
 		this.comments = comments;
+	}
+	public String getTweetId() {
+		return tweetId;
+	}
+	public void setTweetId(String tweetId) {
+		this.tweetId = tweetId;
 	}
 	public String getTweetText() {
 		return tweetText;
@@ -72,6 +79,13 @@ public class TweetResponse {
 	public void setComments(List<CommentPojo> comments) {
 		this.comments = comments;
 	}
+	@Override
+	public String toString() {
+		return "TweetResponse [tweetId=" + tweetId + ", tweetText=" + tweetText + ", tagText=" + tagText
+				+ ", tweetDate=" + tweetDate + ", likesCount=" + likesCount + ", commentCount=" + commentCount
+				+ ", likes=" + likes + ", comments=" + comments + "]";
+	}
+	
 	
 
 }

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,15 +27,17 @@ import com.tweetapp.exception.CustomException;
 import com.tweetapp.payloads.ChangePassoword;
 import com.tweetapp.payloads.CustomResponse;
 import com.tweetapp.payloads.EditPojo;
+import com.tweetapp.payloads.IsAuthorized;
 import com.tweetapp.payloads.LoginCredential;
 import com.tweetapp.payloads.ReplyPojo;
+import com.tweetapp.payloads.ResponseMessage;
 import com.tweetapp.payloads.UserResponse;
 import com.tweetapp.payloads.UserToken;
 import com.tweetapp.repository.UserRepository;
 import com.tweetapp.service.TweetService;
 
 import io.swagger.annotations.ApiOperation;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/v1.0/tweets")
 public class TweetController {
@@ -56,8 +59,24 @@ public class TweetController {
 	@PostMapping("/login")
 	@ApiOperation(notes = "This is for login", value = "Enter the valid credential")
 	public ResponseEntity<?> login(@RequestBody LoginCredential request) throws CustomException {
+		try {
 		UserToken userToken = authService.login(request);
 		return new ResponseEntity<UserToken>(userToken, HttpStatus.OK);
+		}
+		catch(Exception e )
+		{
+			return new ResponseEntity<UserToken>(new UserToken(request.getUsername(), "either password or username is wrong", false), HttpStatus.OK);
+		}
+
+	}
+	@GetMapping("/authorize")
+	@ApiOperation(notes = "This is for login", value = "Enter the valid credential")
+	public ResponseEntity<?> authorize(@RequestHeader(value = "Authorization" , required = true) String token) throws CustomException {
+		
+		if(authService.validate(token).isValid()) {
+			return new ResponseEntity<IsAuthorized>(new IsAuthorized(true), HttpStatus.OK);
+			}
+		return new ResponseEntity<IsAuthorized>(new IsAuthorized(false), HttpStatus.OK);
 
 	}
 
@@ -66,19 +85,23 @@ public class TweetController {
 	public ResponseEntity<?> register(@RequestBody UserEntity user) {
 		try {
 			UserEntity u = userRepository.findUserEntityByUsername(user.getUsername());
-			if (u != null)
-				return ResponseEntity.ok(user.getFirstName() + " already registered");
+			if (u != null) {
+				ResponseMessage rm = new ResponseMessage(user.getFirstName() + " already registered");
+				return new ResponseEntity<ResponseMessage>(rm , HttpStatus.OK);
+			}
 
 			userRepository.save(user);
-			return ResponseEntity.ok(user.getFirstName() + " you successfully registered");
+			ResponseMessage rm = new ResponseMessage(user.getFirstName() + "you uccessfully registered");
+			return new ResponseEntity<ResponseMessage>(rm , HttpStatus.OK);
 
 		} catch (Exception e) {
-			return ResponseEntity.ok("User already is present");
-
+			
+			ResponseMessage rm = new ResponseMessage( "unknown excpetions ");
+			return new ResponseEntity<ResponseMessage>(rm , HttpStatus.OK);
 		}
 	}
 	@GetMapping("/all")
-	@ApiOperation(notes = "Users", value = "returns all users only username")
+	@ApiOperation(notes = "tweets" ,value = "returns all tweets")
 	public ResponseEntity<?> getAllTweets(@RequestHeader(value = "Authorization" , required = true) String token) throws CustomException
 	{
        
@@ -120,7 +143,7 @@ public class TweetController {
 	 }
 
 	@GetMapping("/users/all")
-	@ApiOperation(notes = "all tweet", value = "returns all tweets")
+	@ApiOperation(notes = "all tweet", value = "returns all Users")
 	public ResponseEntity<?> getallusers(@RequestHeader(value = "Authorization" , required = true) String token) throws CustomException
 	{
        
@@ -157,6 +180,7 @@ public class TweetController {
 		}
 		return new ResponseEntity<>("lkjfodij", HttpStatus.OK);
 	}
+	
 	
 	@PutMapping("/{username}/forgot")
 	@ApiOperation(notes = "forgot", value = "change password")
