@@ -104,6 +104,12 @@ public class TweetEntity {
 	public void setComments(List<CommentPojo> comments) {
 		this.comments = comments;
 	}
+	@Override
+	public String toString() {
+		return "TweetEntity [tweetId=" + tweetId + ", username=" + username + ", tweetText=" + tweetText + ", tagText="
+				+ tagText + ", tweetDate=" + tweetDate + ", likesCount=" + likesCount + ", commentCount=" + commentCount
+				+ ", likes=" + likes + ", comments=" + comments + "]";
+	}
 	
 	
 

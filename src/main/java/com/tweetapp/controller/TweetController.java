@@ -2,7 +2,10 @@ package com.tweetapp.controller;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,12 +28,14 @@ import com.tweetapp.dao.TweetEntity;
 import com.tweetapp.dao.UserEntity;
 import com.tweetapp.exception.CustomException;
 import com.tweetapp.payloads.ChangePassoword;
+import com.tweetapp.payloads.CommentPojo;
 import com.tweetapp.payloads.CustomResponse;
 import com.tweetapp.payloads.EditPojo;
 import com.tweetapp.payloads.IsAuthorized;
 import com.tweetapp.payloads.LoginCredential;
 import com.tweetapp.payloads.ReplyPojo;
 import com.tweetapp.payloads.ResponseMessage;
+import com.tweetapp.payloads.Tweet;
 import com.tweetapp.payloads.UserResponse;
 import com.tweetapp.payloads.UserToken;
 import com.tweetapp.repository.UserRepository;
@@ -156,17 +161,17 @@ public class TweetController {
 
 	 }
 	
-	@PutMapping("/like/{tweetId}")
+	@GetMapping("/like/{tweetId}")
 	@ApiOperation(notes = "like", value = "responsible for who likes and likecount increase")
 	public ResponseEntity<?> likeoparation(@RequestHeader(value = "Authorization" , required = true) String token, @PathVariable("tweetId") String tweetId) throws CustomException
 	{
 		if(authService.validate(token).isValid()) {
 			String username  = jwtUtil.extractUsername(token.substring(7));
-		   TweetEntity tweet = tweetService.likeupdate(tweetId,username);
+		    TweetEntity tweet = tweetService.likeupdate(tweetId,username);
 		    return new ResponseEntity(tweet, HttpStatus.OK);
 		
 		}
-		return new ResponseEntity<>("lkjfodij", HttpStatus.OK);
+		return new ResponseEntity<>(null, HttpStatus.OK);
 	}
 	@PutMapping("/reply/{tweetId}")
 	@ApiOperation(notes = "This is for login", value = "responsible for tweet reply and tweet count")
@@ -177,8 +182,8 @@ public class TweetController {
 		   TweetEntity tweet = tweetService.commentupdate(tweetId,username, reply);
 		    return new ResponseEntity(tweet, HttpStatus.OK);
 		
-		}
-		return new ResponseEntity<>("lkjfodij", HttpStatus.OK);
+		}  
+		return new ResponseEntity<>(null, HttpStatus.OK);
 	}
 	
 	
@@ -206,15 +211,26 @@ public class TweetController {
 
 	@PostMapping("/{username}/add")
 	@ApiOperation(notes = "add", value = "adding a new tweet")
-	public String addnewtweet(@PathVariable("username") String username, @RequestBody TweetEntity tweet,@RequestHeader(value = "Authorization" , required = true) String token ) throws CustomException
+	public String addnewtweet(@PathVariable("username") String username, @RequestBody Tweet twt,@RequestHeader(value = "Authorization" , required = true) String token ) throws Exception
 	{
 	  
 		if(authService.validate(token).isValid())
 		{
+			TweetEntity tweet = new TweetEntity();
+			tweet.setTweetText(twt.getTweettext());
+			tweet.setTagText(twt.getTagtext());
+			tweet.setLikesCount(0);
+			tweet.setCommentCount(0);
 			LocalDateTime dateTime = LocalDateTime.now();
 			tweet.setTweetDate(dateTime);
+			List<CommentPojo> comments= new ArrayList<CommentPojo>();
+			tweet.setComments(comments);
+			Set<String> likes = new HashSet<String>();
+			tweet.setLikes(likes);
+			tweet.setUsername(username);
+			System.out.println(tweet.getTagText() + "*******************************" + twt.getTagtext());
 			tweetService.addnewtweet(tweet);
-			return "Successfully posted";
+			return "success";
 		}
 		
 		return "";	  

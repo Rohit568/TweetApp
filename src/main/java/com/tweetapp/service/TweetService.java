@@ -15,7 +15,7 @@ public interface TweetService {
 	
 	public List<String> findallusers();
 	public List<TweetEntity> findalltweets();
-	public void addnewtweet(TweetEntity tweet);
+	public void addnewtweet(TweetEntity tweet) throws Exception;
 	public TweetEntity likeupdate(String tweetId, String username) throws CustomException;
 	public TweetEntity commentupdate(String tweetId, String username, ReplyPojo reply);
 	public List<TweetEntity> getallthetweetsbyusername(String username);

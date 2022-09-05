@@ -1,5 +1,6 @@
 package com.tweetapp.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -46,9 +47,10 @@ public class TweetServiceImpl implements TweetService {
 	}
 
 	@Override
-	public void addnewtweet(TweetEntity tweet) {
+	public void addnewtweet(TweetEntity tweet) throws Exception{
 		// TODO Auto-generated method stub
 		try {
+		
 		tweetRepository.save(tweet);
 		}
 		catch(MongoCommandException e) {
@@ -113,7 +115,8 @@ public class TweetServiceImpl implements TweetService {
 		try {
 			TweetEntity tweet = tweetRepository.findById(tweetId).orElse(null);
 			List<CommentPojo>  list = tweet.getComments();
-	    	list.add(new CommentPojo(username, reply.getReply(),reply.getImageUrl()));
+			LocalDateTime dateTime = LocalDateTime.now();
+	    	list.add(new CommentPojo(username, reply.getReply(),reply.getImageUrl(), dateTime));
 	    	tweet.setCommentCount(list.size());
 	    	tweet.setComments(list);
 	    	tweetRepository.save(tweet);
