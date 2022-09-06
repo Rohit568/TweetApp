@@ -70,7 +70,7 @@ public class TweetController {
 		}
 		catch(Exception e )
 		{
-			return new ResponseEntity<UserToken>(new UserToken(request.getUsername(), "either password or username is wrong", false), HttpStatus.OK);
+			return new ResponseEntity<>(new ResponseMessage("either password or username is wrong"), HttpStatus.OK);
 		}
 
 	}
@@ -91,18 +91,16 @@ public class TweetController {
 		try {
 			UserEntity u = userRepository.findUserEntityByUsername(user.getUsername());
 			if (u != null) {
-				ResponseMessage rm = new ResponseMessage(user.getFirstName() + " already registered");
-				return new ResponseEntity<ResponseMessage>(rm , HttpStatus.OK);
+			
+				return (ResponseEntity<?>) ResponseEntity.badRequest();
 			}
 
 			userRepository.save(user);
-			ResponseMessage rm = new ResponseMessage(user.getFirstName() + "you uccessfully registered");
+			ResponseMessage rm = new ResponseMessage(user.getFirstName() + " you uccessfully registered");
 			return new ResponseEntity<ResponseMessage>(rm , HttpStatus.OK);
 
 		} catch (Exception e) {
-			
-			ResponseMessage rm = new ResponseMessage( "unknown excpetions ");
-			return new ResponseEntity<ResponseMessage>(rm , HttpStatus.OK);
+			return new ResponseEntity<>(new ResponseMessage("error"), HttpStatus.OK);
 		}
 	}
 	@GetMapping("/all")
@@ -116,6 +114,7 @@ public class TweetController {
 		}
 		
 		return new ResponseEntity<>("Unautorized", HttpStatus.UNAUTHORIZED);
+		
 
 	 }
 	@GetMapping("/user/search/{username}")
@@ -171,7 +170,8 @@ public class TweetController {
 		    return new ResponseEntity(tweet, HttpStatus.OK);
 		
 		}
-		return new ResponseEntity<>(null, HttpStatus.OK);
+		return new ResponseEntity<>("Unautorized", HttpStatus.UNAUTHORIZED);
+
 	}
 	@PutMapping("/reply/{tweetId}")
 	@ApiOperation(notes = "This is for login", value = "responsible for tweet reply and tweet count")
@@ -183,7 +183,8 @@ public class TweetController {
 		    return new ResponseEntity(tweet, HttpStatus.OK);
 		
 		}  
-		return new ResponseEntity<>(null, HttpStatus.OK);
+		return new ResponseEntity<>("Unautorized", HttpStatus.UNAUTHORIZED);
+
 	}
 	
 	
@@ -198,20 +199,22 @@ public class TweetController {
 			ChangePassoword n = newPassword;
 			String s = n.getPassword();
 		    if(authService.changePassword(username, s)) {
-		    	return ResponseEntity.ok("Succefully password changed");
+		    	return new ResponseEntity<>(new ResponseMessage("success"), HttpStatus.OK);
 		    }
 		    else
-		    	return new ResponseEntity<>("Error in databse", HttpStatus.OK);
+		    	return new ResponseEntity<>(new ResponseMessage("error"), HttpStatus.OK);
+		    	
 
 		}
-		return new ResponseEntity<>("Authorization problem", HttpStatus.OK);
+		return new ResponseEntity<>("Unautorized", HttpStatus.UNAUTHORIZED);
+
 
 	}
 	
 
 	@PostMapping("/{username}/add")
 	@ApiOperation(notes = "add", value = "adding a new tweet")
-	public String addnewtweet(@PathVariable("username") String username, @RequestBody Tweet twt,@RequestHeader(value = "Authorization" , required = true) String token ) throws Exception
+	public ResponseEntity<?> addnewtweet(@PathVariable("username") String username, @RequestBody Tweet twt,@RequestHeader(value = "Authorization" , required = true) String token ) throws Exception
 	{
 	  
 		if(authService.validate(token).isValid())
@@ -230,36 +233,40 @@ public class TweetController {
 			tweet.setUsername(username);
 			System.out.println(tweet.getTagText() + "*******************************" + twt.getTagtext());
 			tweetService.addnewtweet(tweet);
-			return "success";
+			
+			return new ResponseEntity<>(new ResponseMessage("success"), HttpStatus.OK);
 		}
 		
-		return "";	  
+		return new ResponseEntity<>("Unautorized", HttpStatus.UNAUTHORIZED);
+
 		
 	}
 	@PutMapping("/{username}/update")
 	@ApiOperation(notes = "update tweet", value = "updating a tweet")
-	public String edittweet(@PathVariable("username") String username, @RequestBody EditPojo tweet,@RequestHeader(value = "Authorization" , required = true) String token ) throws CustomException
+	public ResponseEntity<?> edittweet(@PathVariable("username") String username, @RequestBody EditPojo tweet,@RequestHeader(value = "Authorization" , required = true) String token ) throws CustomException
 	{
 	  
 		if(authService.validate(token).isValid())
 		{
 			tweetService.edittweet(tweet);
-			return "Successfully edited";
+			return new ResponseEntity<>(new ResponseMessage("success"), HttpStatus.OK);
 		}
 		
-		return "";	  
+
+		return new ResponseEntity<>("Unautorized", HttpStatus.UNAUTHORIZED);
 		
 	}
 	@DeleteMapping("/{username}/delete/{tweetId}")
 	@ApiOperation(notes = "delete", value = "deleting a tweet")
-	public String deletetweet(@PathVariable("username") String username, @PathVariable("tweetId") String tweetId,@RequestHeader(value = "Authorization" , required = true) String token ) throws CustomException
+	public ResponseEntity<?> deletetweet(@PathVariable("username") String username, @PathVariable("tweetId") String tweetId,@RequestHeader(value = "Authorization" , required = true) String token ) throws CustomException
 	{
 		if(authService.validate(token).isValid())
 		{
 			tweetService.deletetweet(username, tweetId);
-			return "Successfully deleted";
+			return new ResponseEntity<>(new ResponseMessage("deleted"), HttpStatus.OK);
 		}
-		return "something is wrong";
+		return new ResponseEntity<>("Unautorized", HttpStatus.UNAUTHORIZED);
+		
 	}
 	
 	
