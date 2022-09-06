@@ -2,6 +2,7 @@ package com.tweetapp.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.MongoCommandException;
+import com.mongodb.MongoException;
 import com.tweetapp.dao.TweetEntity;
 import com.tweetapp.dao.UserEntity;
 import com.tweetapp.exception.CustomException;
@@ -190,5 +192,38 @@ public class TweetServiceImpl implements TweetService {
 			
 		}
 		return null;
+	}
+
+	@Override
+	public List<String> findallsimilaruser(String usertext) {
+		List<String> list ;
+		try {
+			List<UserEntity> u = userRepository.findByUsernameLike(usertext);
+			
+			list  = u.stream().map(e -> e.getUsername()).collect(Collectors.toList());
+			return list;
+		}
+		catch(MongoException e) {
+			return null;
+		}
+		
+	}
+
+	@Override
+	public Set<TweetEntity> findalltagtweet(String tag) {
+		// TODO Auto-generated method stub
+		Set<TweetEntity> list = new HashSet<>();
+		String str[] = tag.split(" ");
+		System.out.println(str.length+ "*****************************");
+		try {
+			for(String st : str) {
+				Set<TweetEntity> u = tweetRepository.findByTagTextLike(st);
+				for(TweetEntity t : u) list.add(t);
+			}
+			return list;
+		}
+		catch(MongoException e) {
+		return null;
+		}
 	} 
 }

@@ -35,6 +35,7 @@ import com.tweetapp.payloads.IsAuthorized;
 import com.tweetapp.payloads.LoginCredential;
 import com.tweetapp.payloads.ReplyPojo;
 import com.tweetapp.payloads.ResponseMessage;
+import com.tweetapp.payloads.Tag;
 import com.tweetapp.payloads.Tweet;
 import com.tweetapp.payloads.UserResponse;
 import com.tweetapp.payloads.UserToken;
@@ -42,7 +43,8 @@ import com.tweetapp.repository.UserRepository;
 import com.tweetapp.service.TweetService;
 
 import io.swagger.annotations.ApiOperation;
-@CrossOrigin(origins = "*")
+
+@CrossOrigin(origins = "*" , allowedHeaders = "*")
 @RestController
 @RequestMapping("/v1.0/tweets")
 public class TweetController {
@@ -103,6 +105,7 @@ public class TweetController {
 			return new ResponseEntity<>(new ResponseMessage("error"), HttpStatus.OK);
 		}
 	}
+	
 	@GetMapping("/all")
 	@ApiOperation(notes = "tweets" ,value = "returns all tweets")
 	public ResponseEntity<?> getAllTweets(@RequestHeader(value = "Authorization" , required = true) String token) throws CustomException
@@ -117,6 +120,35 @@ public class TweetController {
 		
 
 	 }
+	@PostMapping("/gettagtweet")
+	@ApiOperation(notes = "tweets" ,value = "returns all tag tweets")
+	public ResponseEntity<?> getTweetsByTag(@RequestHeader(value = "Authorization" , required = true) String token, @RequestBody Tag tag) throws CustomException
+	{
+       
+		if(authService.validate(token).isValid()) {
+		Set<TweetEntity> tweets =  tweetService.findalltagtweet(tag.getTag());
+		return new ResponseEntity<Set<TweetEntity>>(tweets,HttpStatus.OK);
+		}
+		
+		return new ResponseEntity<>("Unautorized", HttpStatus.UNAUTHORIZED);
+		
+
+	 }
+	@GetMapping("/allsimilaruser/{username}")
+	@ApiOperation(notes = "tweets" ,value = "returns all tag tweets")
+	public ResponseEntity<?> getsimilaruser(@PathVariable("username") String username,@RequestHeader(value = "Authorization" , required = true) String token) throws CustomException
+	{
+       
+		if(authService.validate(token).isValid()) {
+		List<String> users = tweetService.findallsimilaruser(username);
+		return new ResponseEntity<List<String>>(users,HttpStatus.OK);
+		}
+		
+		return new ResponseEntity<>("Unautorized", HttpStatus.UNAUTHORIZED);
+		
+
+	 }
+	
 	@GetMapping("/user/search/{username}")
     @ApiOperation(notes = "users detail", value = "all information about user")
 	public ResponseEntity<?> getuserdetailbyusername(@RequestHeader(value = "Authorization" , required = true) String token,
@@ -129,7 +161,22 @@ public class TweetController {
 			
 			return new ResponseEntity<>("Unautorized", HttpStatus.UNAUTHORIZED);
 	}
+	 
+	
+		@GetMapping("/username/{uname}")
+		@ApiOperation(notes = "users tweet", value = "returns the all user's tweet")
+		public ResponseEntity<?> getusername(@PathVariable("uname") String uname, @RequestHeader(value = "Authorization" , required = true) String token) throws CustomException
+		{
+	       
+			if(authService.validate(token).isValid()) {
+			String username = jwtUtil.extractUsername(token.substring(7));
+			List<TweetEntity> tweets = tweetService.getallthetweetsbyusername(username);
+			return new ResponseEntity<List<TweetEntity>>(tweets,HttpStatus.OK);
+			}
+			
+			return new ResponseEntity<>("Unautorized", HttpStatus.UNAUTHORIZED);
 
+		 }
 	
 	@GetMapping("/username")
 	@ApiOperation(notes = "users tweet", value = "returns the all user's tweet")

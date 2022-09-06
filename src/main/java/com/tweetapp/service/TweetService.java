@@ -1,6 +1,7 @@
 package com.tweetapp.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
@@ -22,5 +23,7 @@ public interface TweetService {
 	public TweetEntity edittweet(EditPojo tweet);
 	public void deletetweet(String username, String tweetId);
 	public UserResponse findinfoofuser(String username);
+	public List<String> findallsimilaruser(String usertext);
+	public Set<TweetEntity> findalltagtweet(String tag);
 
 }
