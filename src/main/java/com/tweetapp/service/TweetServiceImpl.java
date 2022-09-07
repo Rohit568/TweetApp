@@ -213,7 +213,7 @@ public class TweetServiceImpl implements TweetService {
 	public Set<TweetEntity> findalltagtweet(String tag) {
 		// TODO Auto-generated method stub
 		Set<TweetEntity> list = new HashSet<>();
-		String str[] = tag.split(" ");
+		String str[] = tag.trim().split(" ");
 		System.out.println(str.length+ "*****************************");
 		try {
 			for(String st : str) {
